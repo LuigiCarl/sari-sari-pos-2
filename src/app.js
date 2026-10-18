@@ -11,6 +11,11 @@ const posRoutes = require('./routes/pos');
 const helpers = require('./utils/helpers');
 
 const app = express();
+const sessionSecret = process.env.SESSION_SECRET;
+
+if (process.env.NODE_ENV === 'production' && (!sessionSecret || sessionSecret === 'dev-secret-change-me')) {
+  throw new Error('SESSION_SECRET must be configured with a unique value in production.');
+}
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -23,10 +28,10 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use(
   cookieSession({
     name: 'session',
-    keys: [process.env.SESSION_SECRET || 'dev-secret-change-me'],
+    keys: [sessionSecret || 'dev-secret-change-me'],
     maxAge: 8 * 60 * 60 * 1000, // 8-hour shift
     sameSite: 'lax',
-    secure: Boolean(process.env.VERCEL), // only require https in deployed environments
+    secure: process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL),
   })
 );
 
