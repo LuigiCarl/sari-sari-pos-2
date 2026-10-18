@@ -2,6 +2,7 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const cookieSession = require('cookie-session');
+const helmet = require('helmet');
 
 const { refreshAuthenticatedUser, requireAuth } = require('./middleware/auth');
 const flash = require('./middleware/flash');
@@ -22,6 +23,13 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.set('trust proxy', 1); // behind Vercel's proxy, so req.secure reflects the original https request
 
+app.use(
+  helmet({
+    // Existing EJS pages contain a few inline scripts/styles. Keep the other
+    // security headers enabled while CSP is migrated to nonce-based assets.
+    contentSecurityPolicy: false,
+  })
+);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
@@ -37,8 +45,8 @@ app.use(
 );
 
 app.use(refreshAuthenticatedUser);
-app.use(csrfProtection);
 app.use(flash);
+app.use(csrfProtection);
 app.locals.peso = helpers.peso;
 
 app.get('/', requireAuth, (req, res) => {

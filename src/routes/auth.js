@@ -1,10 +1,35 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const { rateLimit } = require('express-rate-limit');
 const { query } = require('../config/db');
 const { redirectIfAuthed } = require('../middleware/auth');
 const { setFlash } = require('../middleware/flash');
 
 const router = express.Router();
+
+function renderRateLimitError(req, res) {
+  res.status(429).render('error', {
+    title: 'Too Many Attempts',
+    message: 'Too many attempts from this connection. Please wait and try again.',
+  });
+}
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,
+  handler: renderRateLimitError,
+});
+
+const registrationLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 5,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  handler: renderRateLimitError,
+});
 
 function setUserSession(req, user) {
   req.session = {
@@ -21,7 +46,7 @@ router.get('/login', redirectIfAuthed, (req, res) => {
   res.render('login', { title: 'Login' });
 });
 
-router.post('/login', async (req, res, next) => {
+router.post('/login', loginLimiter, async (req, res, next) => {
   const username = typeof req.body.username === 'string' ? req.body.username.trim().toLowerCase() : '';
   const password = typeof req.body.password === 'string' ? req.body.password : '';
   try {
@@ -48,7 +73,7 @@ router.get('/register', redirectIfAuthed, (req, res) => {
   });
 });
 
-router.post('/register', async (req, res, next) => {
+router.post('/register', registrationLimiter, async (req, res, next) => {
   const username = typeof req.body.username === 'string' ? req.body.username.trim().toLowerCase() : '';
   const fullName = typeof req.body.full_name === 'string' ? req.body.full_name.trim() : '';
   const password = typeof req.body.password === 'string' ? req.body.password : '';
