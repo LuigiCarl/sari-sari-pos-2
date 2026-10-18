@@ -154,21 +154,113 @@ a { color: var(--primary); }
 
 .login-page {
   min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle at 12% 8%, #fff 0, transparent 28%), linear-gradient(135deg, #fff7fb, #ffd7e8);
+}
+.login-page::before, .login-page::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(236, 72, 126, 0.08);
+}
+.login-page::before { width: 28rem; height: 28rem; left: -12rem; bottom: -16rem; }
+.login-page::after { width: 19rem; height: 19rem; right: -7rem; top: -9rem; }
+.login-shell {
+  width: min(960px, 100%);
+  min-height: 590px;
+  display: grid;
+  grid-template-columns: 1.08fr 0.92fr;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 28px;
+  box-shadow: 0 28px 70px rgba(139, 31, 75, 0.16);
+}
+.login-brand {
+  padding: 2.5rem 3rem 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(155deg, #fff0f7, #ffd4e6);
+}
+.login-logo-wrap { width: min(340px, 82%); margin: 0 auto; filter: drop-shadow(0 18px 24px rgba(165, 30, 82, 0.17)); }
+.login-logo { display: block; width: 100%; height: auto; clip-path: circle(47% at 50% 50%); }
+.login-brand-copy { max-width: 29rem; }
+.login-eyebrow, .login-kicker {
+  color: #d91f68;
+  font-weight: 800;
+  font-size: 0.72rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+.login-brand-copy h1 {
+  margin: 0.65rem 0 0.8rem;
+  color: #641b3c;
+  font-size: clamp(1.9rem, 3.2vw, 2.8rem);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+.login-brand-copy p { margin: 0; color: #8c506a; font-size: 0.98rem; line-height: 1.65; }
+.login-form-panel {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 3.5rem;
 }
 .login-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 2rem;
-  width: 320px;
+  width: 100%;
+  max-width: 350px;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.15rem;
 }
-.login-card h1 { margin: 0; font-size: 1.3rem; }
+.login-heading { margin-bottom: 0.45rem; }
+.login-heading h2 { margin: 0.45rem 0 0.35rem; color: #3d1d2c; font-size: 2rem; letter-spacing: -0.03em; }
+.login-heading > p:last-child { margin: 0; color: var(--muted); }
+.login-card label { color: #5e4350; font-weight: 700; gap: 0.5rem; }
+.login-card input:not([type="hidden"]) {
+  width: 100%;
+  padding: 0.85rem 0.95rem;
+  border-color: #e7d5dd;
+  border-radius: 10px;
+  background: #fffafb;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+.login-card input:not([type="hidden"]):focus {
+  outline: none;
+  border-color: #e73378;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(231, 51, 120, 0.12);
+}
+.login-submit {
+  margin-top: 0.25rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ec3f80, #cf185d);
+  box-shadow: 0 10px 22px rgba(207, 24, 93, 0.23);
+}
+.login-submit:hover { background: linear-gradient(135deg, #d92a6d, #b91352); }
+.login-register { margin: 0.35rem 0 0; color: var(--muted); text-align: center; font-size: 0.88rem; }
+.login-register a { color: #d91f68; font-weight: 700; text-decoration: none; }
+.login-register a:hover { text-decoration: underline; }
+.login-mobile-mark { display: none; }
+
+@media (max-width: 760px) {
+  .login-page { padding: 1.25rem; align-items: start; }
+  .login-shell { min-height: 0; grid-template-columns: 1fr; margin: 1.5rem 0; }
+  .login-brand { display: none; }
+  .login-form-panel { padding: 2.2rem 1.5rem 2.4rem; }
+  .login-card { max-width: 390px; }
+  .login-mobile-mark { display: block; width: 92px; margin-bottom: 1.1rem; filter: drop-shadow(0 8px 12px rgba(165, 30, 82, 0.14)); }
+  .login-mobile-mark img { display: block; width: 100%; clip-path: circle(47% at 50% 50%); }
+  .login-heading h2 { font-size: 1.7rem; }
+}
 
 /* POS screen */
 .pos-layout {

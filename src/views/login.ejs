@@ -1,20 +1,39 @@
 <%- include('partials/head') %>
 <div class="login-page">
-  <form method="POST" action="/login" class="login-card">
-    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-    <h1>🏪 Sari-Sari POS</h1>
-    <p class="muted">Sign in to continue</p>
-    <% if (flash && flash.error) { %><div class="alert alert-error"><%= flash.error %></div><% } %>
-    <label>Username
-      <input type="text" name="username" autofocus required />
-    </label>
-    <label>Password
-      <input type="password" name="password" required />
-    </label>
-    <button type="submit" class="btn btn-primary btn-block">Login</button>
-    <p class="muted" style="text-align: center; margin: 0;">
-      No account yet? <a href="/register">Register</a>
-    </p>
-  </form>
+  <main class="login-shell">
+    <section class="login-brand" aria-label="Sari-Sari POS">
+      <div class="login-logo-wrap">
+        <img src="/images/sari-sari-logo.png" alt="Sari-Sari store logo" class="login-logo" />
+      </div>
+      <div class="login-brand-copy">
+        <span class="login-eyebrow">Simple. Mabilis. Maaasahan.</span>
+        <h1>Ang tindahan mo,<br />mas madaling bantayan.</h1>
+        <p>Sales, stocks, at araw-araw na galaw ng negosyo—nasa iisang lugar.</p>
+      </div>
+    </section>
+
+    <section class="login-form-panel">
+      <form method="POST" action="/login" class="login-card">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="login-heading">
+          <span class="login-mobile-mark"><img src="/images/sari-sari-logo.png" alt="" /></span>
+          <p class="login-kicker">Sari-Sari POS</p>
+          <h2>Welcome back!</h2>
+          <p>Sign in to manage your store.</p>
+        </div>
+        <% if (flash && flash.error) { %><div class="alert alert-error"><%= flash.error %></div><% } %>
+        <label>Username
+          <input type="text" name="username" autocomplete="username" placeholder="Enter your username" autofocus required />
+        </label>
+        <label>Password
+          <input type="password" name="password" autocomplete="current-password" placeholder="Enter your password" required />
+        </label>
+        <button type="submit" class="btn btn-primary btn-block login-submit">Sign in</button>
+        <p class="login-register">
+          No account yet? <a href="/register">Create an account</a>
+        </p>
+      </form>
+    </section>
+  </main>
 </div>
 <%- include('partials/foot') %>
