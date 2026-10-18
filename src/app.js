@@ -3,8 +3,9 @@ const path = require('path');
 const express = require('express');
 const cookieSession = require('cookie-session');
 
-const { requireAuth } = require('./middleware/auth');
+const { refreshAuthenticatedUser, requireAuth } = require('./middleware/auth');
 const flash = require('./middleware/flash');
+const csrfProtection = require('./middleware/csrf');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const posRoutes = require('./routes/pos');
@@ -35,11 +36,12 @@ app.use(
   })
 );
 
+app.use(refreshAuthenticatedUser);
+app.use(csrfProtection);
 app.use(flash);
 app.locals.peso = helpers.peso;
 
-app.get('/', (req, res) => {
-  if (!req.session.user) return res.redirect('/login');
+app.get('/', requireAuth, (req, res) => {
   res.redirect(req.session.user.role === 'admin' ? '/admin/dashboard' : '/pos');
 });
 

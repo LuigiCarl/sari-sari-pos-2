@@ -32,6 +32,7 @@
     <div class="cart-total">Total: <span id="cartTotal">₱0.00</span></div>
 
     <form method="POST" action="/pos/checkout" id="checkoutForm">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <input type="hidden" name="items" id="itemsInput" />
       <label>Amount Paid
         <input type="number" step="0.01" min="0" name="amount_paid" id="amountPaid" required />

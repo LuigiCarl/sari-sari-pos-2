@@ -1,3 +1,32 @@
+const { query } = require('../config/db');
+
+async function refreshAuthenticatedUser(req, res, next) {
+  if (!req.session.user) return next();
+
+  try {
+    const { rows } = await query(
+      'SELECT id, username, full_name, role, active FROM users WHERE id = $1',
+      [req.session.user.id]
+    );
+    const user = rows[0];
+
+    if (!user || !user.active) {
+      req.session = null;
+      return res.redirect('/login');
+    }
+
+    req.session.user = {
+      id: user.id,
+      username: user.username,
+      fullName: user.full_name,
+      role: user.role,
+    };
+    next();
+  } catch (err) {
+    next(err);
+  }
+}
+
 function requireAuth(req, res, next) {
   if (!req.session.user) {
     return res.redirect('/login');
@@ -27,4 +56,4 @@ function redirectIfAuthed(req, res, next) {
   next();
 }
 
-module.exports = { requireAuth, requireRole, redirectIfAuthed };
+module.exports = { refreshAuthenticatedUser, requireAuth, requireRole, redirectIfAuthed };

@@ -7,6 +7,7 @@
     <div class="card">
       <h2>Add Product</h2>
       <form method="POST" action="/admin/products" class="form-grid">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <label>Name <input type="text" name="name" required /></label>
         <label>Barcode <input type="text" name="barcode" /></label>
         <label>Category
@@ -27,6 +28,7 @@
     <div class="card">
       <h2>Add Category</h2>
       <form method="POST" action="/admin/categories" class="form-inline">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <input type="text" name="name" placeholder="Category name" required />
         <button type="submit" class="btn btn-secondary">Add</button>
       </form>
@@ -67,6 +69,7 @@
                 <td><input form="<%= fid %>" type="checkbox" name="active" value="1" <%= p.active ? 'checked' : '' %> /></td>
                 <td>
                   <form id="<%= fid %>" method="POST" action="/admin/products/<%= p.id %>"></form>
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" form="<%= fid %>">
                   <button form="<%= fid %>" type="submit" class="btn btn-small">Save</button>
                 </td>
             </tr>
