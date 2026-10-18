@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { query } = require('../config/db');
+const { query, getClient } = require('../config/db');
 const { setFlash } = require('../middleware/flash');
 
 async function dashboard(req, res, next) {
@@ -167,34 +167,101 @@ async function listUsers(req, res, next) {
 }
 
 async function createUser(req, res, next) {
-  const { username, password, full_name, role } = req.body;
+  const username = typeof req.body.username === 'string' ? req.body.username.trim().toLowerCase() : '';
+  const fullName = typeof req.body.full_name === 'string' ? req.body.full_name.trim() : '';
+  const password = typeof req.body.password === 'string' ? req.body.password : '';
+  const role = req.body.role === 'admin' ? 'admin' : 'sales_rep';
+
   try {
+    if (!/^[a-z0-9][a-z0-9._-]{2,49}$/.test(username)) {
+      setFlash(req, 'error', 'Username must be 3-50 characters and use only letters, numbers, dots, underscores, or hyphens.');
+      return res.redirect('/admin/users');
+    }
+    if (!fullName || fullName.length > 100) {
+      setFlash(req, 'error', 'Full name is required and must be 100 characters or fewer.');
+      return res.redirect('/admin/users');
+    }
+    if (password.length < 6 || password.length > 72) {
+      setFlash(req, 'error', 'Password must be between 6 and 72 characters.');
+      return res.redirect('/admin/users');
+    }
+
     const hash = bcrypt.hashSync(password, 10);
     await query('INSERT INTO users (username, password_hash, full_name, role) VALUES ($1, $2, $3, $4)', [
       username,
       hash,
-      full_name,
-      role === 'admin' ? 'admin' : 'sales_rep',
+      fullName,
+      role,
     ]);
     setFlash(req, 'success', `User "${username}" created.`);
     res.redirect('/admin/users');
   } catch (err) {
-    setFlash(req, 'error', `Could not create user: ${err.message}`);
+    setFlash(
+      req,
+      'error',
+      err.code === '23505' ? 'That username is already taken.' : 'Could not create the user. Please try again.'
+    );
     res.redirect('/admin/users');
   }
 }
 
 async function toggleUserActive(req, res, next) {
-  const { id } = req.params;
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).render('error', { title: 'Bad Request', message: 'Invalid user ID.' });
+  }
+
+  if (id === req.session.user.id) {
+    setFlash(req, 'error', 'You cannot deactivate your own account.');
+    return res.redirect('/admin/users');
+  }
+
+  let client;
+  let transactionStarted = false;
   try {
-    if (Number(id) === req.session.user.id) {
-      setFlash(req, 'error', 'You cannot deactivate your own account.');
-      return res.redirect('/admin/users');
+    client = await getClient();
+    await client.query('BEGIN');
+    transactionStarted = true;
+    // Serialize admin status changes so two concurrent requests cannot both
+    // deactivate what each believes is a non-final active administrator.
+    await client.query('LOCK TABLE users IN SHARE ROW EXCLUSIVE MODE');
+
+    const { rows } = await client.query('SELECT id, username, role, active FROM users WHERE id = $1', [id]);
+    const target = rows[0];
+    if (!target) {
+      await client.query('ROLLBACK');
+      transactionStarted = false;
+      return res.status(404).render('error', { title: 'Not Found', message: 'User not found.' });
     }
-    await query('UPDATE users SET active = NOT active WHERE id = $1', [id]);
+
+    if (target.active && target.role === 'admin') {
+      const { rows: countRows } = await client.query(
+        "SELECT COUNT(*)::int AS count FROM users WHERE role = 'admin' AND active = TRUE"
+      );
+      if (countRows[0].count <= 1) {
+        await client.query('ROLLBACK');
+        transactionStarted = false;
+        setFlash(req, 'error', 'The last active admin cannot be deactivated.');
+        return res.redirect('/admin/users');
+      }
+    }
+
+    await client.query('UPDATE users SET active = NOT active WHERE id = $1', [id]);
+    await client.query('COMMIT');
+    transactionStarted = false;
+    setFlash(req, 'success', `User "${target.username}" ${target.active ? 'deactivated' : 'activated'}.`);
     res.redirect('/admin/users');
   } catch (err) {
+    if (client && transactionStarted) {
+      try {
+        await client.query('ROLLBACK');
+      } catch (rollbackErr) {
+        console.error('Failed to roll back user status update:', rollbackErr);
+      }
+    }
     next(err);
+  } finally {
+    if (client) client.release();
   }
 }
 

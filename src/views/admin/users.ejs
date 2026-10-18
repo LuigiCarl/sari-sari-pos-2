@@ -7,9 +7,9 @@
     <h2>Add User</h2>
     <form method="POST" action="/admin/users" class="form-grid">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <label>Username <input type="text" name="username" required /></label>
-      <label>Full Name <input type="text" name="full_name" required /></label>
-      <label>Password <input type="password" name="password" required minlength="6" /></label>
+      <label>Username <input type="text" name="username" required minlength="3" maxlength="50" pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,49}" /></label>
+      <label>Full Name <input type="text" name="full_name" required maxlength="100" /></label>
+      <label>Password <input type="password" name="password" required minlength="6" maxlength="72" /></label>
       <label>Role
         <select name="role">
           <option value="sales_rep">Sales Representative</option>
