@@ -16,9 +16,9 @@ test.describe('Cashier POS Flow', () => {
     // Verify category pills are visible
     const pills = page.locator('.category-pill');
     await expect(pills.first()).toBeVisible();
-    await expect(pills.first()).toContainText('Lahat');
+    await expect(pills.first()).toContainText('All');
 
-    // Click a category pill (e.g. Beverages or second pill)
+    // Click a category pill (e.g. second pill if available)
     if (await pills.count() > 1) {
       await pills.nth(1).click();
       await expect(pills.nth(1)).toHaveClass(/active/);

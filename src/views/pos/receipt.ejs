@@ -5,13 +5,13 @@
     <div class="receipt-header">
       <img src="/images/sari-sari-logo.png" alt="Sari-Sari Store Logo" class="receipt-logo" />
       <h2 class="receipt-store-name">SARI-SARI STORE</h2>
-      <p class="receipt-subhead">Tindahan ng Bayan · Benta & Resibo</p>
+      <p class="receipt-subhead">Official Sales Receipt</p>
       <div class="receipt-divider">================================</div>
     </div>
 
     <div class="receipt-meta">
-      <div class="receipt-meta-row"><span>Resibo #:</span> <strong><%= sale.receipt_no %></strong></div>
-      <div class="receipt-meta-row"><span>Petsa:</span> <span><%= sale.created_at %></span></div>
+      <div class="receipt-meta-row"><span>Receipt #:</span> <strong><%= sale.receipt_no %></strong></div>
+      <div class="receipt-meta-row"><span>Date:</span> <span><%= sale.created_at %></span></div>
       <div class="receipt-meta-row"><span>Cashier:</span> <span><%= sale.cashier_name || 'Juana Cruz' %></span></div>
     </div>
 
@@ -22,7 +22,7 @@
         <tr>
           <th style="text-align: left;">Item</th>
           <th style="text-align: center;">Qty</th>
-          <th style="text-align: right;">Presyo</th>
+          <th style="text-align: right;">Price</th>
           <th style="text-align: right;">Total</th>
         </tr>
       </thead>
@@ -42,15 +42,15 @@
 
     <div class="receipt-totals">
       <div class="receipt-total-row highlight">
-        <span>KABUUAN (TOTAL):</span>
+        <span>TOTAL:</span>
         <strong><%= peso(sale.total_amount) %></strong>
       </div>
       <div class="receipt-total-row">
-        <span>Binayad (Cash):</span>
+        <span>Amount Paid:</span>
         <span><%= peso(sale.amount_paid) %></span>
       </div>
       <div class="receipt-total-row">
-        <span>Sukli (Change):</span>
+        <span>Change:</span>
         <span><%= peso(sale.change_amount) %></span>
       </div>
     </div>
@@ -58,14 +58,14 @@
     <div class="receipt-divider">================================</div>
 
     <div class="receipt-footer">
-      <p>Maraming salamat po sa inyong pagbili!</p>
-      <p>Balik po kayo muli! 😊</p>
+      <p>Thank you for your purchase!</p>
+      <p>Please come again! 😊</p>
     </div>
   </div>
 
   <div class="receipt-actions no-print">
     <button onclick="window.print()" class="btn btn-secondary">🖨️ Print Receipt</button>
-    <a href="/pos" class="btn btn-primary">➕ Bagong Benta (New Sale)</a>
+    <a href="/pos" class="btn btn-primary">➕ New Sale</a>
   </div>
 </main>
 <%- include('../partials/foot') %>

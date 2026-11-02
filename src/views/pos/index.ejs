@@ -12,7 +12,7 @@
     </div>
 
     <div class="category-pills" id="categoryPills">
-      <button type="button" class="category-pill active" data-category="all">Lahat (All)</button>
+      <button type="button" class="category-pill active" data-category="all">All</button>
       <% if (typeof categories !== 'undefined') { %>
         <% categories.forEach(c => { %>
           <button type="button" class="category-pill" data-category="<%= c.id %>"><%= c.name %></button>
@@ -65,7 +65,7 @@
           <button type="button" class="quick-cash-btn" data-cash="100">₱100</button>
           <button type="button" class="quick-cash-btn" data-cash="200">₱200</button>
           <button type="button" class="quick-cash-btn" data-cash="500">₱500</button>
-          <button type="button" class="quick-cash-btn" data-cash="1000">₱1k</button>
+          <button type="button" class="quick-cash-btn" data-cash="1000">₱1,000</button>
         </div>
       </div>
 

@@ -8,7 +8,7 @@
       <div class="stat-label">Today's Sales</div>
       <div class="stat-value"><%= peso(todayTotal.total) %></div>
       <div class="stat-profit-pill">
-        Tubo: <strong><%= peso(todayProfit.profit) %></strong> <span class="stat-margin">(<%= todayMargin %>%)</span>
+        Profit: <strong><%= peso(todayProfit.profit) %></strong> <span class="stat-margin">(<%= todayMargin %>%)</span>
       </div>
       <div class="stat-sub"><%= todayTotal.count %> transaction<%= todayTotal.count === 1 ? '' : 's' %></div>
     </div>
@@ -16,7 +16,7 @@
       <div class="stat-label">Last 7 Days</div>
       <div class="stat-value"><%= peso(weekTotal.total) %></div>
       <div class="stat-profit-pill">
-        Tubo: <strong><%= peso(weekProfit.profit) %></strong> <span class="stat-margin">(<%= weekMargin %>%)</span>
+        Profit: <strong><%= peso(weekProfit.profit) %></strong> <span class="stat-margin">(<%= weekMargin %>%)</span>
       </div>
       <div class="stat-sub"><%= weekTotal.count %> transaction<%= weekTotal.count === 1 ? '' : 's' %></div>
     </div>
@@ -24,7 +24,7 @@
       <div class="stat-label">This Month</div>
       <div class="stat-value"><%= peso(monthTotal.total) %></div>
       <div class="stat-profit-pill">
-        Tubo: <strong><%= peso(monthProfit.profit) %></strong> <span class="stat-margin">(<%= monthMargin %>%)</span>
+        Profit: <strong><%= peso(monthProfit.profit) %></strong> <span class="stat-margin">(<%= monthMargin %>%)</span>
       </div>
       <div class="stat-sub"><%= monthTotal.count %> transaction<%= monthTotal.count === 1 ? '' : 's' %></div>
     </div>
@@ -32,7 +32,7 @@
 
   <div class="grid-2">
     <div class="card">
-      <h2>Sales & Tubo Trend (7 days)</h2>
+      <h2>Sales & Profit Trend (7 days)</h2>
       <canvas id="salesTrendChart" height="220"></canvas>
     </div>
 
@@ -42,7 +42,7 @@
         <p class="muted">No sales recorded yet.</p>
       <% } else { %>
         <table class="table">
-          <thead><tr><th>Product</th><th>Units</th><th>Revenue</th><th>Tubo</th></tr></thead>
+          <thead><tr><th>Product</th><th>Units</th><th>Revenue</th><th>Profit</th></tr></thead>
           <tbody>
             <% topProducts.forEach(p => { %>
               <tr>
@@ -123,7 +123,7 @@
           fill: true,
         },
         {
-          label: 'Tubo / Profit (₱)',
+          label: 'Gross Profit (₱)',
           data: trendData.map(d => d.profit),
           borderColor: '#059669',
           backgroundColor: 'rgba(5, 150, 105, 0.08)',
