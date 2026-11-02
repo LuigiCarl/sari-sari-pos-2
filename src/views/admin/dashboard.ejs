@@ -1,7 +1,10 @@
 <%- include('../partials/head') %>
 <%- include('../partials/nav') %>
-<main class="container">
-  <h1>Dashboard</h1>
+<main class="container dashboard-compact">
+  <div class="dashboard-header">
+    <h1>Dashboard</h1>
+    <span class="dashboard-tag">📊 Sales & Store Overview</span>
+  </div>
 
   <div class="stat-row">
     <div class="stat-card">
@@ -33,7 +36,9 @@
   <div class="grid-2">
     <div class="card">
       <h2>Sales & Profit Trend (7 days)</h2>
-      <canvas id="salesTrendChart" height="220"></canvas>
+      <div class="chart-wrap-compact">
+        <canvas id="salesTrendChart" height="150"></canvas>
+      </div>
     </div>
 
     <div class="card">
@@ -41,19 +46,21 @@
       <% if (topProducts.length === 0) { %>
         <p class="muted">No sales recorded yet.</p>
       <% } else { %>
-        <table class="table">
-          <thead><tr><th>Product</th><th>Units</th><th>Revenue</th><th>Profit</th></tr></thead>
-          <tbody>
-            <% topProducts.forEach(p => { %>
-              <tr>
-                <td><%= p.product_name %></td>
-                <td><%= p.units_sold %></td>
-                <td><%= peso(p.revenue) %></td>
-                <td class="cell-profit"><%= peso(p.profit) %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
+        <div class="table-scroll">
+          <table class="table">
+            <thead><tr><th>Product</th><th>Units</th><th>Revenue</th><th>Profit</th></tr></thead>
+            <tbody>
+              <% topProducts.forEach(p => { %>
+                <tr>
+                  <td><%= p.product_name %></td>
+                  <td><%= p.units_sold %></td>
+                  <td><%= peso(p.revenue) %></td>
+                  <td class="cell-profit"><%= peso(p.profit) %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
       <% } %>
     </div>
   </div>
@@ -64,18 +71,20 @@
       <% if (lowStock.length === 0) { %>
         <p class="muted">All products are sufficiently stocked.</p>
       <% } else { %>
-        <table class="table">
-          <thead><tr><th>Product</th><th>Stock</th><th>Reorder Level</th></tr></thead>
-          <tbody>
-            <% lowStock.forEach(p => { %>
-              <tr class="<%= p.stock_quantity === 0 ? 'row-danger' : 'row-warning' %>">
-                <td><%= p.name %></td>
-                <td><%= p.stock_quantity %> <%= p.unit %></td>
-                <td><%= p.reorder_level %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
+        <div class="table-scroll">
+          <table class="table">
+            <thead><tr><th>Product</th><th>Stock</th><th>Reorder Level</th></tr></thead>
+            <tbody>
+              <% lowStock.forEach(p => { %>
+                <tr class="<%= p.stock_quantity === 0 ? 'row-danger' : 'row-warning' %>">
+                  <td><%= p.name %></td>
+                  <td><%= p.stock_quantity %> <%= p.unit %></td>
+                  <td><%= p.reorder_level %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
       <% } %>
     </div>
 
@@ -84,19 +93,21 @@
       <% if (recentSales.length === 0) { %>
         <p class="muted">No transactions yet.</p>
       <% } else { %>
-        <table class="table">
-          <thead><tr><th>Receipt</th><th>Cashier</th><th>Total</th><th>When</th></tr></thead>
-          <tbody>
-            <% recentSales.forEach(s => { %>
-              <tr>
-                <td><a href="/admin/sales/<%= s.id %>"><%= s.receipt_no %></a></td>
-                <td><%= s.cashier %></td>
-                <td><%= peso(s.total_amount) %></td>
-                <td><%= s.created_at %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
+        <div class="table-scroll">
+          <table class="table">
+            <thead><tr><th>Receipt</th><th>Cashier</th><th>Total</th><th>When</th></tr></thead>
+            <tbody>
+              <% recentSales.forEach(s => { %>
+                <tr>
+                  <td><a href="/admin/sales/<%= s.id %>"><%= s.receipt_no %></a></td>
+                  <td><%= s.cashier %></td>
+                  <td><%= peso(s.total_amount) %></td>
+                  <td><%= s.created_at %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
       <% } %>
     </div>
   </div>
@@ -118,7 +129,7 @@
           backgroundColor: 'rgba(217, 31, 104, 0.08)',
           pointBackgroundColor: '#d91f68',
           pointBorderColor: '#ffffff',
-          pointRadius: 4,
+          pointRadius: 3,
           tension: 0.35,
           fill: true,
         },
@@ -129,34 +140,36 @@
           backgroundColor: 'rgba(5, 150, 105, 0.08)',
           pointBackgroundColor: '#059669',
           pointBorderColor: '#ffffff',
-          pointRadius: 4,
+          pointRadius: 3,
           tension: 0.35,
           fill: true,
         }
       ],
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: {
           display: true,
           position: 'top',
           labels: {
             color: '#8c6b79',
-            boxWidth: 14,
+            boxWidth: 10,
             usePointStyle: true,
-            font: { weight: '600', size: 12 }
+            font: { weight: '600', size: 11 }
           }
         }
       },
       scales: {
         y: {
           beginAtZero: true,
-          grid: { color: 'rgba(243, 220, 230, 0.6)' },
-          ticks: { color: '#8c6b79' }
+          grid: { color: 'rgba(243, 220, 230, 0.5)' },
+          ticks: { color: '#8c6b79', font: { size: 10 } }
         },
         x: {
-          grid: { color: 'rgba(243, 220, 230, 0.35)' },
-          ticks: { color: '#8c6b79' }
+          grid: { color: 'rgba(243, 220, 230, 0.25)' },
+          ticks: { color: '#8c6b79', font: { size: 10 } }
         }
       },
     },

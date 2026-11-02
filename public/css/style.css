@@ -980,3 +980,80 @@ a:hover {
   align-items: center;
   gap: 0.35rem;
 }
+
+
+/* ==========================================================================
+   Compact Dashboard Styles
+   ========================================================================== */
+.dashboard-compact {
+  padding-top: 1rem;
+  padding-bottom: 1.5rem;
+}
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 1.45rem;
+}
+.dashboard-tag {
+  font-size: 0.78rem;
+  color: var(--muted);
+  background: var(--pink-soft);
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-weight: 600;
+}
+.dashboard-compact .stat-row {
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+.dashboard-compact .stat-card {
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+}
+.dashboard-compact .stat-value {
+  font-size: 1.6rem;
+  margin-top: 0.15rem;
+}
+.dashboard-compact .stat-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+.dashboard-compact .stat-profit-pill {
+  margin-top: 0.35rem;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.76rem;
+}
+.dashboard-compact .stat-sub {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+.dashboard-compact .grid-2 {
+  gap: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+.dashboard-compact .card {
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  margin-bottom: 0;
+}
+.dashboard-compact .card h2 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+.dashboard-compact .table th,
+.dashboard-compact .table td {
+  padding: 0.38rem 0.55rem;
+  font-size: 0.82rem;
+}
+.chart-wrap-compact {
+  position: relative;
+  height: 155px;
+  width: 100%;
+}
