@@ -1,43 +1,62 @@
 <%- include('partials/head') %>
 <div class="login-page">
-  <form method="POST" action="/register" class="login-card">
-    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-    <h1>🏪 Sari-Sari POS</h1>
-    <p class="muted">Create an account</p>
-    <% if (flash && flash.error) { %><div class="alert alert-error"><%= flash.error %></div><% } %>
+  <main class="login-shell">
+    <section class="login-brand" aria-label="Sari-Sari POS">
+      <div class="login-logo-wrap">
+        <img src="/images/sari-sari-logo.png" alt="Sari-Sari store logo" class="login-logo" />
+      </div>
+      <div class="login-brand-copy">
+        <span class="login-eyebrow">Simple. Mabilis. Maaasahan.</span>
+        <h1>Ang tindahan mo,<br />mas madaling bantayan.</h1>
+        <p>Sales, stocks, at araw-araw na galaw ng negosyo—nasa iisang lugar.</p>
+      </div>
+    </section>
 
-    <label>Full Name
-      <input type="text" name="full_name" required autofocus />
-    </label>
-    <label>Username
-      <input type="text" name="username" required />
-    </label>
-    <label>Password
-      <input type="password" name="password" required minlength="6" />
-    </label>
-    <label>Confirm Password
-      <input type="password" name="confirm_password" required minlength="6" />
-    </label>
-    <label>Account Type
-      <select name="role" id="roleSelect">
-        <option value="sales_rep">Sales Representative (Cashier)</option>
-        <% if (adminSignupEnabled) { %><option value="admin">Admin</option><% } %>
-      </select>
-    </label>
-    <label id="adminCodeField" hidden>Admin Setup Code
-      <input type="text" name="admin_code" id="adminCodeInput" autocomplete="off" />
-    </label>
-    <% if (!adminSignupEnabled) { %>
-      <p class="muted" style="font-size: 0.8rem; margin: -0.5rem 0 0;">
-        Admin self-registration is currently disabled. New admins must be created from the Admin &gt; Users page.
-      </p>
-    <% } %>
+    <section class="login-form-panel">
+      <form method="POST" action="/register" class="login-card">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="login-heading">
+          <span class="login-mobile-mark"><img src="/images/sari-sari-logo.png" alt="" /></span>
+          <p class="login-kicker">Sari-Sari POS</p>
+          <h2>Create account</h2>
+          <p>Sign up to start managing your store.</p>
+        </div>
+        <% if (flash && flash.error) { %><div class="alert alert-error"><%= flash.error %></div><% } %>
 
-    <button type="submit" class="btn btn-primary btn-block">Create Account</button>
-    <p class="muted" style="text-align: center; margin: 0;">
-      Already have an account? <a href="/login">Login</a>
-    </p>
-  </form>
+        <label>Full Name
+          <input type="text" name="full_name" placeholder="Juan dela Cruz" required autofocus />
+        </label>
+        <label>Username
+          <input type="text" name="username" placeholder="cashier_juan" required />
+        </label>
+        <label>Password
+          <input type="password" name="password" placeholder="At least 6 characters" required minlength="6" />
+        </label>
+        <label>Confirm Password
+          <input type="password" name="confirm_password" placeholder="Re-enter password" required minlength="6" />
+        </label>
+        <label>Account Type
+          <select name="role" id="roleSelect">
+            <option value="sales_rep">Sales Representative (Cashier)</option>
+            <% if (adminSignupEnabled) { %><option value="admin">Admin</option><% } %>
+          </select>
+        </label>
+        <label id="adminCodeField" hidden>Admin Setup Code
+          <input type="text" name="admin_code" id="adminCodeInput" placeholder="Enter admin setup code" autocomplete="off" />
+        </label>
+        <% if (!adminSignupEnabled) { %>
+          <p class="muted" style="font-size: 0.8rem; margin: -0.25rem 0 0;">
+            Admin self-registration is currently disabled. New admins must be created from Admin &gt; Users.
+          </p>
+        <% } %>
+
+        <button type="submit" class="btn btn-primary btn-block login-submit">Create Account</button>
+        <p class="login-register">
+          Already have an account? <a href="/login">Sign in</a>
+        </p>
+      </form>
+    </section>
+  </main>
 </div>
 <script>
   const roleSelect = document.getElementById('roleSelect');

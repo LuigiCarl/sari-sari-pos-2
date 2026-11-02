@@ -1,23 +1,28 @@
 <header class="topbar">
-  <div class="topbar-brand">🏪 Sari-Sari POS</div>
+  <div class="topbar-brand">
+    <a href="/" class="topbar-brand-link">
+      <img src="/images/sari-sari-logo.png" alt="Sari-Sari POS Logo" class="topbar-logo" />
+      <span>Sari-Sari POS</span>
+    </a>
+  </div>
   <nav class="topbar-nav">
     <% if (currentUser && currentUser.role === 'admin') { %>
-      <a href="/admin/dashboard">Dashboard</a>
-      <a href="/admin/products">Products</a>
-      <a href="/admin/sales">Sales</a>
-      <a href="/admin/inventory-reports">Inventory Reports</a>
-      <a href="/admin/users">Users</a>
+      <a href="/admin/dashboard" class="<%= typeof title !== 'undefined' && title === 'Dashboard' ? 'active' : '' %>">Dashboard</a>
+      <a href="/admin/products" class="<%= typeof title !== 'undefined' && title === 'Products' ? 'active' : '' %>">Products</a>
+      <a href="/admin/sales" class="<%= typeof title !== 'undefined' && (title === 'Sales' || title === 'Sale Detail') ? 'active' : '' %>">Sales</a>
+      <a href="/admin/inventory-reports" class="<%= typeof title !== 'undefined' && title === 'Inventory Reports' ? 'active' : '' %>">Inventory Reports</a>
+      <a href="/admin/users" class="<%= typeof title !== 'undefined' && title === 'Users' ? 'active' : '' %>">Users</a>
     <% } else if (currentUser && currentUser.role === 'sales_rep') { %>
-      <a href="/pos">Point of Sale</a>
-      <a href="/pos/inventory">Inventory</a>
+      <a href="/pos" class="<%= typeof title !== 'undefined' && title === 'Point of Sale' ? 'active' : '' %>">Point of Sale</a>
+      <a href="/pos/inventory" class="<%= typeof title !== 'undefined' && title === 'Inventory' ? 'active' : '' %>">Inventory</a>
     <% } %>
   </nav>
   <div class="topbar-user">
     <% if (currentUser) { %>
-      <span><%= currentUser.fullName %> (<%= currentUser.role === 'admin' ? 'Admin' : 'Sales Rep' %>)</span>
+      <span class="user-badge"><%= currentUser.fullName %> <small>(<%= currentUser.role === 'admin' ? 'Admin' : 'Sales Rep' %>)</small></span>
       <form method="POST" action="/logout" class="inline-form">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <button type="submit" class="link-button">Logout</button>
+        <button type="submit" class="logout-btn">Logout</button>
       </form>
     <% } %>
   </div>
