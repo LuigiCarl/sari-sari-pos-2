@@ -413,7 +413,99 @@ async function salesChartData(req, res, next) {
   }
 }
 
+
+function escapeCsv(val) {
+  if (val === null || val === undefined) return '';
+  const str = String(val);
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+async function exportSalesCsv(req, res, next) {
+  const { from, to } = req.query;
+  try {
+    let text = `SELECT sales.id, receipt_no, total_amount, amount_paid, change_amount, sales.created_at, users.full_name AS cashier
+                FROM sales JOIN users ON users.id = sales.user_id`;
+    const conditions = [];
+    const params = [];
+    if (from) {
+      params.push(from);
+      conditions.push(`sales.created_at::date >= ${params.length}::date`);
+    }
+    if (to) {
+      params.push(to);
+      conditions.push(`sales.created_at::date <= ${params.length}::date`);
+    }
+    if (conditions.length) text += ' WHERE ' + conditions.join(' AND ');
+    text += ' ORDER BY sales.created_at DESC';
+
+    const { rows: sales } = await query(text, params);
+
+    const headers = ['Receipt No', 'Date', 'Cashier', 'Total Amount', 'Amount Paid', 'Change Amount'];
+    const lines = [headers.join(',')];
+
+    for (const s of sales) {
+      lines.push([
+        escapeCsv(s.receipt_no),
+        escapeCsv(new Date(s.created_at).toLocaleString('en-PH')),
+        escapeCsv(s.cashier),
+        escapeCsv(Number(s.total_amount).toFixed(2)),
+        escapeCsv(Number(s.amount_paid).toFixed(2)),
+        escapeCsv(Number(s.change_amount).toFixed(2)),
+      ].join(','));
+    }
+
+    const csvContent = lines.join('\r\n');
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="sari-sari-sales.csv"');
+    res.status(200).send(csvContent);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function exportProductsCsv(req, res, next) {
+  try {
+    const { rows: products } = await query(`
+      SELECT products.name, products.barcode, categories.name AS category,
+             products.unit, products.cost_price, products.selling_price,
+             products.stock_quantity, products.reorder_level, products.active
+      FROM products
+      LEFT JOIN categories ON categories.id = products.category_id
+      ORDER BY products.name
+    `);
+
+    const headers = ['Product Name', 'Barcode', 'Category', 'Unit', 'Cost Price', 'Selling Price', 'Stock Quantity', 'Reorder Level', 'Active'];
+    const lines = [headers.join(',')];
+
+    for (const p of products) {
+      lines.push([
+        escapeCsv(p.name),
+        escapeCsv(p.barcode || ''),
+        escapeCsv(p.category || 'Uncategorized'),
+        escapeCsv(p.unit),
+        escapeCsv(Number(p.cost_price).toFixed(2)),
+        escapeCsv(Number(p.selling_price).toFixed(2)),
+        escapeCsv(p.stock_quantity),
+        escapeCsv(p.reorder_level),
+        escapeCsv(p.active ? 'Yes' : 'No'),
+      ].join(','));
+    }
+
+    const csvContent = lines.join('\r\n');
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="sari-sari-products.csv"');
+    res.status(200).send(csvContent);
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
+  exportSalesCsv,
+  exportProductsCsv,
   dashboard,
   listProducts,
   createProduct,

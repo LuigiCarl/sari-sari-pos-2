@@ -8,7 +8,12 @@
   <nav class="topbar-nav">
     <% if (currentUser && currentUser.role === 'admin') { %>
       <a href="/admin/dashboard" class="<%= typeof title !== 'undefined' && title === 'Dashboard' ? 'active' : '' %>">Dashboard</a>
-      <a href="/admin/products" class="<%= typeof title !== 'undefined' && title === 'Products' ? 'active' : '' %>">Products</a>
+      <a href="/admin/products" class="<%= typeof title !== 'undefined' && title === 'Products' ? 'active' : '' %>">
+        Products
+        <% if (typeof lowStockCount !== 'undefined' && lowStockCount > 0) { %>
+          <span class="nav-alert-pill" title="<%= lowStockCount %> items low or out of stock"><%= lowStockCount %></span>
+        <% } %>
+      </a>
       <a href="/admin/sales" class="<%= typeof title !== 'undefined' && (title === 'Sales' || title === 'Sale Detail') ? 'active' : '' %>">Sales</a>
       <a href="/admin/inventory-reports" class="<%= typeof title !== 'undefined' && title === 'Inventory Reports' ? 'active' : '' %>">Inventory Reports</a>
       <a href="/admin/users" class="<%= typeof title !== 'undefined' && title === 'Users' ? 'active' : '' %>">Users</a>

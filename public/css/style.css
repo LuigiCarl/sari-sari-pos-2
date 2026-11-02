@@ -943,3 +943,32 @@ a:hover {
     max-width: 100% !important;
   }
 }
+
+
+/* Phase 4: Low Stock Badge & Export Button */
+.nav-alert-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  margin-left: 0.35rem;
+  box-shadow: 0 2px 5px rgba(220, 38, 38, 0.35);
+  line-height: 1;
+}
+.btn-export {
+  font-size: 0.85rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}

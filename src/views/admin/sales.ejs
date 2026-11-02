@@ -1,7 +1,10 @@
 <%- include('../partials/head') %>
 <%- include('../partials/nav') %>
 <main class="container">
-  <h1>Sales Transactions</h1>
+  <div class="pos-header-row">
+    <h1>Sales Transactions</h1>
+    <a href="/admin/sales/export.csv?from=<%= from %>&to=<%= to %>" class="btn btn-secondary btn-export" id="exportSalesBtn">📥 Export CSV</a>
+  </div>
 
   <div class="card">
     <form method="GET" action="/admin/sales" class="form-inline">

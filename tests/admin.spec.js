@@ -23,7 +23,14 @@ test.describe('Admin Experience & Dashboard', () => {
     await expect(page.locator('h2', { hasText: 'Recent Transactions' })).toBeVisible();
   });
 
-  test('products management page displays products and category controls', async ({ page }) => {
+  test('low stock notification badge is visible in nav for admin', async ({ page }) => {
+    const badge = page.locator('.nav-alert-pill');
+    await expect(badge).toBeVisible();
+    const count = parseInt(await badge.innerText(), 10);
+    expect(count).toBeGreaterThan(0);
+  });
+
+  test('products management page displays products, controls, and allows CSV export', async ({ page }) => {
     await page.click('nav a[href="/admin/products"]');
     await expect(page).toHaveURL(/\/admin\/products/);
     await expect(page.locator('h1')).toContainText('Products');
@@ -32,15 +39,35 @@ test.describe('Admin Experience & Dashboard', () => {
     await expect(page.locator('form[action="/admin/products"]')).toBeVisible();
     // Check add category form
     await expect(page.locator('form[action="/admin/categories"]')).toBeVisible();
+    // Check export button visible
+    await expect(page.locator('#exportProductsBtn')).toBeVisible();
+
     // Check products table
     const rows = page.locator('table tbody tr');
     await expect(rows.first()).toBeVisible();
+
+    // Test CSV export API endpoint
+    const resp = await page.request.get('/admin/products/export.csv');
+    expect(resp.status()).toBe(200);
+    const text = await resp.text();
+    expect(text).toContain('Product Name');
+    expect(text).toContain('Selling Price');
   });
 
-  test('sales history displays receipts and allows viewing details', async ({ page }) => {
+  test('sales history displays receipts and allows CSV export', async ({ page }) => {
     await page.click('nav a[href="/admin/sales"]');
     await expect(page).toHaveURL(/\/admin\/sales/);
     await expect(page.locator('h1')).toContainText('Sales');
+
+    // Check export button visible
+    await expect(page.locator('#exportSalesBtn')).toBeVisible();
+
+    // Test CSV export API endpoint
+    const resp = await page.request.get('/admin/sales/export.csv');
+    expect(resp.status()).toBe(200);
+    const text = await resp.text();
+    expect(text).toContain('Receipt No');
+    expect(text).toContain('Total Amount');
 
     // Check receipt links
     const firstReceipt = page.locator('table tbody tr td a').first();
@@ -64,4 +91,3 @@ test.describe('Admin Experience & Dashboard', () => {
     await expect(page.locator('table')).toContainText('Juana Cruz');
   });
 });
-
