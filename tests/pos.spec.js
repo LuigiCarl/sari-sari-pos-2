@@ -9,9 +9,22 @@ test.describe('Cashier POS Flow', () => {
     await expect(page).toHaveURL(/\/pos/);
   });
 
-  test('pos screen renders products and enables cart interactions', async ({ page }) => {
+  test('pos screen renders products, category pills, quick cash, and thermal receipt', async ({ page }) => {
     await expect(page.locator('h1')).toContainText('Point of Sale');
     await expect(page.locator('#productSearch')).toBeVisible();
+
+    // Verify category pills are visible
+    const pills = page.locator('.category-pill');
+    await expect(pills.first()).toBeVisible();
+    await expect(pills.first()).toContainText('Lahat');
+
+    // Click a category pill (e.g. Beverages or second pill)
+    if (await pills.count() > 1) {
+      await pills.nth(1).click();
+      await expect(pills.nth(1)).toHaveClass(/active/);
+      // Return to All
+      await pills.first().click();
+    }
 
     const productTiles = page.locator('.product-tile');
     await expect(productTiles.first()).toBeVisible();
@@ -27,8 +40,13 @@ test.describe('Cashier POS Flow', () => {
     const totalText = await page.locator('#cartTotal').innerText();
     expect(totalText).not.toBe('₱0.00');
 
-    // Enter payment amount
-    await page.fill('#amountPaid', '500');
+    // Test Quick Cash button (₱500)
+    const quickCash500 = page.locator('button.quick-cash-btn[data-cash="500"]');
+    await expect(quickCash500).toBeVisible();
+    await quickCash500.click();
+
+    // Verify amount paid input was updated
+    await expect(page.locator('#amountPaid')).toHaveValue('500.00');
 
     // Verify change is calculated
     const changeText = await page.locator('#changeAmount').innerText();
@@ -43,8 +61,9 @@ test.describe('Cashier POS Flow', () => {
 
     // Verify redirect to receipt page
     await expect(page).toHaveURL(/\/pos\/receipt\/\d+/);
-    await expect(page.locator('h1')).toContainText('Receipt');
-    await expect(page.locator('table')).toBeVisible();
+    await expect(page.locator('.receipt-paper')).toBeVisible();
+    await expect(page.locator('.receipt-store-name')).toContainText('SARI-SARI STORE');
+    await expect(page.locator('.receipt-table')).toBeVisible();
     await expect(page.locator('a.btn[href="/pos"]')).toBeVisible();
   });
 
@@ -56,4 +75,3 @@ test.describe('Cashier POS Flow', () => {
     await expect(page.locator('form[action="/pos/inventory/report"]')).toBeVisible();
   });
 });
-

@@ -725,3 +725,221 @@ a:hover {
   font-size: 0.8rem;
   padding: 2rem 1rem;
 }
+
+
+/* ==========================================================================
+   Phase 3: POS Power-Ups & Thermal Receipt Styles
+   ========================================================================== */
+
+.pos-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.pos-hint-tag {
+  font-size: 0.78rem;
+  color: var(--muted);
+  background: var(--pink-soft);
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+
+.category-pills {
+  display: flex;
+  gap: 0.45rem;
+  overflow-x: auto;
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+.category-pill {
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  color: var(--text-color);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.category-pill:hover {
+  border-color: var(--primary-pink);
+  color: var(--primary-pink);
+}
+.category-pill.active {
+  background: var(--primary-pink);
+  border-color: var(--primary-pink);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(217, 31, 104, 0.25);
+}
+
+.quick-cash-group {
+  margin: 0.65rem 0;
+}
+.quick-cash-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 0.35rem;
+}
+.quick-cash-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.35rem;
+}
+.quick-cash-btn {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.45rem 0.3rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.quick-cash-btn:hover {
+  background: var(--pink-soft);
+  border-color: var(--primary-pink);
+  color: var(--primary-pink);
+}
+
+/* Thermal Receipt Styling */
+.receipt-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 1rem 3rem;
+}
+.receipt-paper {
+  width: 100%;
+  max-width: 380px;
+  background: #ffffff;
+  border: 1px dashed #d1c4cb;
+  border-radius: 8px;
+  padding: 1.5rem 1.25rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  font-family: 'Courier New', Courier, monospace;
+  color: #222222;
+}
+.receipt-header {
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+.receipt-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  margin: 0 auto 0.35rem;
+  display: block;
+}
+.receipt-store-name {
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  margin: 0;
+  color: #111111;
+}
+.receipt-subhead {
+  font-size: 0.75rem;
+  color: #555555;
+  margin: 0.15rem 0 0.5rem;
+}
+.receipt-divider {
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  color: #888888;
+  letter-spacing: -0.05em;
+  margin: 0.35rem 0;
+}
+.receipt-meta {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  margin: 0.5rem 0;
+}
+.receipt-meta-row {
+  display: flex;
+  justify-content: space-between;
+}
+.receipt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  margin: 0.5rem 0;
+}
+.receipt-table th {
+  border-bottom: 1px solid #ddd;
+  padding: 0.25rem 0;
+  font-weight: 700;
+}
+.receipt-table td {
+  padding: 0.3rem 0;
+}
+.receipt-totals {
+  font-size: 0.85rem;
+  margin: 0.5rem 0;
+}
+.receipt-total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+.receipt-total-row.highlight {
+  font-size: 1rem;
+  font-weight: 900;
+  border-top: 1px dashed #444;
+  border-bottom: 1px dashed #444;
+  padding: 0.35rem 0;
+  margin: 0.4rem 0;
+}
+.receipt-footer {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #444444;
+  margin-top: 0.75rem;
+  line-height: 1.35;
+}
+.receipt-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  width: 100%;
+  max-width: 380px;
+}
+.receipt-actions .btn {
+  flex: 1;
+  text-align: center;
+  padding: 0.65rem 1rem;
+}
+
+/* Print Rules */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .topbar, .app-footer, .no-print, .receipt-actions, .alert {
+    display: none !important;
+  }
+  .container.receipt-screen {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+  .receipt-paper {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    max-width: 100% !important;
+  }
+}
