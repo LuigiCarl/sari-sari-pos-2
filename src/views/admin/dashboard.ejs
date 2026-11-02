@@ -5,25 +5,34 @@
 
   <div class="stat-row">
     <div class="stat-card">
-      <div class="stat-label">Today</div>
+      <div class="stat-label">Today's Sales</div>
       <div class="stat-value"><%= peso(todayTotal.total) %></div>
+      <div class="stat-profit-pill">
+        Tubo: <strong><%= peso(todayProfit.profit) %></strong> <span class="stat-margin">(<%= todayMargin %>%)</span>
+      </div>
       <div class="stat-sub"><%= todayTotal.count %> transaction<%= todayTotal.count === 1 ? '' : 's' %></div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Last 7 Days</div>
       <div class="stat-value"><%= peso(weekTotal.total) %></div>
+      <div class="stat-profit-pill">
+        Tubo: <strong><%= peso(weekProfit.profit) %></strong> <span class="stat-margin">(<%= weekMargin %>%)</span>
+      </div>
       <div class="stat-sub"><%= weekTotal.count %> transaction<%= weekTotal.count === 1 ? '' : 's' %></div>
     </div>
     <div class="stat-card">
       <div class="stat-label">This Month</div>
       <div class="stat-value"><%= peso(monthTotal.total) %></div>
+      <div class="stat-profit-pill">
+        Tubo: <strong><%= peso(monthProfit.profit) %></strong> <span class="stat-margin">(<%= monthMargin %>%)</span>
+      </div>
       <div class="stat-sub"><%= monthTotal.count %> transaction<%= monthTotal.count === 1 ? '' : 's' %></div>
     </div>
   </div>
 
   <div class="grid-2">
     <div class="card">
-      <h2>Sales Trend (7 days)</h2>
+      <h2>Sales & Tubo Trend (7 days)</h2>
       <canvas id="salesTrendChart" height="220"></canvas>
     </div>
 
@@ -33,13 +42,14 @@
         <p class="muted">No sales recorded yet.</p>
       <% } else { %>
         <table class="table">
-          <thead><tr><th>Product</th><th>Units</th><th>Revenue</th></tr></thead>
+          <thead><tr><th>Product</th><th>Units</th><th>Revenue</th><th>Tubo</th></tr></thead>
           <tbody>
             <% topProducts.forEach(p => { %>
               <tr>
                 <td><%= p.product_name %></td>
                 <td><%= p.units_sold %></td>
                 <td><%= peso(p.revenue) %></td>
+                <td class="cell-profit"><%= peso(p.profit) %></td>
               </tr>
             <% }) %>
           </tbody>
@@ -100,20 +110,44 @@
     type: 'line',
     data: {
       labels: trendData.map(d => d.day.slice(5)),
-      datasets: [{
-        label: 'Sales (₱)',
-        data: trendData.map(d => d.total),
-        borderColor: '#d91f68',
-        backgroundColor: 'rgba(217, 31, 104, 0.12)',
-        pointBackgroundColor: '#d91f68',
-        pointBorderColor: '#ffffff',
-        pointRadius: 4,
-        tension: 0.35,
-        fill: true,
-      }],
+      datasets: [
+        {
+          label: 'Total Sales (₱)',
+          data: trendData.map(d => d.total),
+          borderColor: '#d91f68',
+          backgroundColor: 'rgba(217, 31, 104, 0.08)',
+          pointBackgroundColor: '#d91f68',
+          pointBorderColor: '#ffffff',
+          pointRadius: 4,
+          tension: 0.35,
+          fill: true,
+        },
+        {
+          label: 'Tubo / Profit (₱)',
+          data: trendData.map(d => d.profit),
+          borderColor: '#059669',
+          backgroundColor: 'rgba(5, 150, 105, 0.08)',
+          pointBackgroundColor: '#059669',
+          pointBorderColor: '#ffffff',
+          pointRadius: 4,
+          tension: 0.35,
+          fill: true,
+        }
+      ],
     },
     options: {
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: {
+            color: '#8c6b79',
+            boxWidth: 14,
+            usePointStyle: true,
+            font: { weight: '600', size: 12 }
+          }
+        }
+      },
       scales: {
         y: {
           beginAtZero: true,

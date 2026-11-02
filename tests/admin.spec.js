@@ -12,10 +12,13 @@ test.describe('Admin Experience & Dashboard', () => {
   test('dashboard renders analytics cards, trend chart, and tables', async ({ page }) => {
     await expect(page.locator('h1')).toContainText('Dashboard');
     await expect(page.locator('.stat-label').first()).toContainText('Today');
+    await expect(page.locator('.stat-profit-pill').first()).toBeVisible();
+    await expect(page.locator('.stat-profit-pill').first()).toContainText('Tubo:');
     await expect(page.locator('#salesTrendChart')).toBeVisible();
 
     // Verify sections exist
     await expect(page.locator('h2', { hasText: 'Top Products' })).toBeVisible();
+    await expect(page.locator('table', { hasText: 'Tubo' })).toBeVisible();
     await expect(page.locator('h2', { hasText: 'Low Stock Alerts' })).toBeVisible();
     await expect(page.locator('h2', { hasText: 'Recent Transactions' })).toBeVisible();
   });
