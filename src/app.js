@@ -51,6 +51,7 @@ app.use(refreshAuthenticatedUser);
 app.use(flash);
 app.use(csrfProtection);
 app.locals.peso = helpers.peso;
+app.locals.formatDateTime = helpers.formatDateTime;
 
 app.use(async (req, res, next) => {
   if (req.session && req.session.user && req.session.user.role === 'admin') {

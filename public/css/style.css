@@ -1057,3 +1057,67 @@ a:hover {
   height: 155px;
   width: 100%;
 }
+
+
+/* Dashboard Card Headers & Polish */
+.card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+.card-title-row h2 {
+  margin: 0 !important;
+}
+.card-action-link {
+  font-size: 0.78rem;
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+.card-action-link:hover {
+  text-decoration: underline;
+}
+
+.receipt-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.receipt-code:hover {
+  text-decoration: underline;
+}
+
+.text-nowrap {
+  white-space: nowrap;
+}
+.text-muted {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.stock-pill {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.stock-low {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+.stock-empty {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.table-scroll-fixed {
+  max-height: 225px;
+  overflow-y: auto;
+}

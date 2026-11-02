@@ -13,4 +13,16 @@ function dateOnly(d) {
   return new Date(d).toISOString().slice(0, 10);
 }
 
-module.exports = { generateReceiptNo, peso, dateOnly };
+function formatDateTime(d) {
+  if (!d) return '';
+  const date = new Date(d);
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+}
+
+module.exports = { generateReceiptNo, peso, dateOnly, formatDateTime };

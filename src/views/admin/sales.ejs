@@ -19,21 +19,23 @@
     <% if (sales.length === 0) { %>
       <p class="muted">No transactions found.</p>
     <% } else { %>
-      <table class="table">
-        <thead><tr><th>Receipt</th><th>Cashier</th><th>Total</th><th>Paid</th><th>Change</th><th>When</th></tr></thead>
-        <tbody>
-          <% sales.forEach(s => { %>
-            <tr>
-              <td><a href="/admin/sales/<%= s.id %>"><%= s.receipt_no %></a></td>
-              <td><%= s.cashier %></td>
-              <td><%= peso(s.total_amount) %></td>
-              <td><%= peso(s.amount_paid) %></td>
-              <td><%= peso(s.change_amount) %></td>
-              <td><%= s.created_at %></td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
+      <div class="table-scroll">
+        <table class="table">
+          <thead><tr><th>Receipt</th><th>Cashier</th><th>Total</th><th>Paid</th><th>Change</th><th>When</th></tr></thead>
+          <tbody>
+            <% sales.forEach(s => { %>
+              <tr>
+                <td><a href="/admin/sales/<%= s.id %>" class="receipt-code"><%= s.receipt_no %></a></td>
+                <td><%= s.cashier %></td>
+                <td><strong><%= peso(s.total_amount) %></strong></td>
+                <td><%= peso(s.amount_paid) %></td>
+                <td><%= peso(s.change_amount) %></td>
+                <td class="text-nowrap text-muted"><%= formatDateTime(s.created_at) %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
     <% } %>
   </div>
 </main>

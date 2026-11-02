@@ -67,7 +67,10 @@
 
   <div class="grid-2">
     <div class="card">
-      <h2>Low Stock Alerts</h2>
+      <div class="card-title-row">
+        <h2>Low Stock Alerts</h2>
+        <a href="/admin/products" class="card-action-link">Manage Products →</a>
+      </div>
       <% if (lowStock.length === 0) { %>
         <p class="muted">All products are sufficiently stocked.</p>
       <% } else { %>
@@ -77,8 +80,8 @@
             <tbody>
               <% lowStock.forEach(p => { %>
                 <tr class="<%= p.stock_quantity === 0 ? 'row-danger' : 'row-warning' %>">
-                  <td><%= p.name %></td>
-                  <td><%= p.stock_quantity %> <%= p.unit %></td>
+                  <td><strong><%= p.name %></strong></td>
+                  <td><span class="stock-pill <%= p.stock_quantity === 0 ? 'stock-empty' : 'stock-low' %>"><%= p.stock_quantity %> <%= p.unit %></span></td>
                   <td><%= p.reorder_level %></td>
                 </tr>
               <% }) %>
@@ -89,20 +92,23 @@
     </div>
 
     <div class="card">
-      <h2>Recent Transactions</h2>
+      <div class="card-title-row">
+        <h2>Recent Transactions</h2>
+        <a href="/admin/sales" class="card-action-link">View All →</a>
+      </div>
       <% if (recentSales.length === 0) { %>
         <p class="muted">No transactions yet.</p>
       <% } else { %>
-        <div class="table-scroll">
+        <div class="table-scroll table-scroll-fixed">
           <table class="table">
             <thead><tr><th>Receipt</th><th>Cashier</th><th>Total</th><th>When</th></tr></thead>
             <tbody>
               <% recentSales.forEach(s => { %>
                 <tr>
-                  <td><a href="/admin/sales/<%= s.id %>"><%= s.receipt_no %></a></td>
+                  <td><a href="/admin/sales/<%= s.id %>" class="receipt-code"><%= s.receipt_no %></a></td>
                   <td><%= s.cashier %></td>
-                  <td><%= peso(s.total_amount) %></td>
-                  <td><%= s.created_at %></td>
+                  <td><strong><%= peso(s.total_amount) %></strong></td>
+                  <td class="text-nowrap text-muted"><%= formatDateTime(s.created_at) %></td>
                 </tr>
               <% }) %>
             </tbody>
