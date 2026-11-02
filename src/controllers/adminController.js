@@ -4,7 +4,18 @@ const { setFlash } = require('../middleware/flash');
 
 async function dashboard(req, res, next) {
   try {
-    const [todayTotal, weekTotal, monthTotal, trend, topProducts, lowStock, recentSales] = await Promise.all([
+    const [
+      todayTotal,
+      weekTotal,
+      monthTotal,
+      todayProfit,
+      weekProfit,
+      monthProfit,
+      trend,
+      topProducts,
+      lowStock,
+      recentSales,
+    ] = await Promise.all([
       query(
         `SELECT COALESCE(SUM(total_amount), 0) AS total, COUNT(*) AS count
          FROM sales WHERE created_at::date = CURRENT_DATE`
@@ -18,15 +29,46 @@ async function dashboard(req, res, next) {
          FROM sales WHERE to_char(created_at, 'YYYY-MM') = to_char(NOW(), 'YYYY-MM')`
       ).then((r) => r.rows[0]),
       query(
-        `SELECT to_char(created_at, 'YYYY-MM-DD') AS day, COALESCE(SUM(total_amount), 0) AS total
-         FROM sales
-         WHERE created_at >= NOW() - INTERVAL '6 days'
+        `SELECT COALESCE(SUM(sale_items.subtotal - (sale_items.quantity * COALESCE(products.cost_price, 0))), 0) AS profit
+         FROM sale_items
+         JOIN products ON products.id = sale_items.product_id
+         JOIN sales ON sales.id = sale_items.sale_id
+         WHERE sales.created_at::date = CURRENT_DATE`
+      ).then((r) => r.rows[0]),
+      query(
+        `SELECT COALESCE(SUM(sale_items.subtotal - (sale_items.quantity * COALESCE(products.cost_price, 0))), 0) AS profit
+         FROM sale_items
+         JOIN products ON products.id = sale_items.product_id
+         JOIN sales ON sales.id = sale_items.sale_id
+         WHERE sales.created_at >= NOW() - INTERVAL '6 days'`
+      ).then((r) => r.rows[0]),
+      query(
+        `SELECT COALESCE(SUM(sale_items.subtotal - (sale_items.quantity * COALESCE(products.cost_price, 0))), 0) AS profit
+         FROM sale_items
+         JOIN products ON products.id = sale_items.product_id
+         JOIN sales ON sales.id = sale_items.sale_id
+         WHERE to_char(sales.created_at, 'YYYY-MM') = to_char(NOW(), 'YYYY-MM')`
+      ).then((r) => r.rows[0]),
+      query(
+        `SELECT 
+           to_char(sales.created_at, 'YYYY-MM-DD') AS day,
+           COALESCE(SUM(sale_items.subtotal), 0) AS total,
+           COALESCE(SUM(sale_items.subtotal - (sale_items.quantity * COALESCE(products.cost_price, 0))), 0) AS profit
+         FROM sale_items
+         JOIN products ON products.id = sale_items.product_id
+         JOIN sales ON sales.id = sale_items.sale_id
+         WHERE sales.created_at >= NOW() - INTERVAL '6 days'
          GROUP BY day
          ORDER BY day`
       ).then((r) => r.rows),
       query(
-        `SELECT sale_items.product_name, SUM(sale_items.quantity) AS units_sold, SUM(sale_items.subtotal) AS revenue
+        `SELECT 
+           sale_items.product_name,
+           SUM(sale_items.quantity) AS units_sold,
+           SUM(sale_items.subtotal) AS revenue,
+           COALESCE(SUM(sale_items.subtotal - (sale_items.quantity * COALESCE(products.cost_price, 0))), 0) AS profit
          FROM sale_items
+         JOIN products ON products.id = sale_items.product_id
          JOIN sales ON sales.id = sale_items.sale_id
          WHERE sales.created_at >= NOW() - INTERVAL '29 days'
          GROUP BY sale_items.product_id, sale_items.product_name
@@ -45,20 +87,31 @@ async function dashboard(req, res, next) {
     ]);
 
     // Fill in missing days with zero so the trend chart has a full 7-day axis.
-    const trendByDay = Object.fromEntries(trend.map((r) => [r.day, r.total]));
+    const trendByDay = Object.fromEntries(trend.map((r) => [r.day, { total: r.total, profit: r.profit }]));
     const trendData = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const key = d.toISOString().slice(0, 10);
-      trendData.push({ day: key, total: trendByDay[key] || 0 });
+      const item = trendByDay[key] || { total: 0, profit: 0 };
+      trendData.push({ day: key, total: item.total || 0, profit: item.profit || 0 });
     }
+
+    const todayMargin = todayTotal.total > 0 ? ((todayProfit.profit / todayTotal.total) * 100).toFixed(1) : '0.0';
+    const weekMargin = weekTotal.total > 0 ? ((weekProfit.profit / weekTotal.total) * 100).toFixed(1) : '0.0';
+    const monthMargin = monthTotal.total > 0 ? ((monthProfit.profit / monthTotal.total) * 100).toFixed(1) : '0.0';
 
     res.render('admin/dashboard', {
       title: 'Dashboard',
       todayTotal,
       weekTotal,
       monthTotal,
+      todayProfit,
+      weekProfit,
+      monthProfit,
+      todayMargin,
+      weekMargin,
+      monthMargin,
       trendData,
       topProducts,
       lowStock,
@@ -330,29 +383,129 @@ async function salesChartData(req, res, next) {
   try {
     const days = Math.min(Number(req.query.days) || 7, 90);
     const { rows } = await query(
-      `SELECT to_char(created_at, 'YYYY-MM-DD') AS day, COALESCE(SUM(total_amount), 0) AS total
-       FROM sales
-       WHERE created_at >= NOW() - ($1::text || ' days')::interval
+      `SELECT 
+         to_char(sales.created_at, 'YYYY-MM-DD') AS day,
+         COALESCE(SUM(sale_items.subtotal), 0) AS total,
+         COALESCE(SUM(sale_items.subtotal - (sale_items.quantity * COALESCE(products.cost_price, 0))), 0) AS profit
+       FROM sale_items
+       JOIN products ON products.id = sale_items.product_id
+       JOIN sales ON sales.id = sale_items.sale_id
+       WHERE sales.created_at >= NOW() - ($1::text || ' days')::interval
        GROUP BY day ORDER BY day`,
       [String(days - 1)]
     );
-    const byDay = Object.fromEntries(rows.map((r) => [r.day, r.total]));
+    const byDay = Object.fromEntries(rows.map((r) => [r.day, { total: r.total, profit: r.profit }]));
     const labels = [];
     const totals = [];
+    const profits = [];
     for (let i = days - 1; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const key = d.toISOString().slice(0, 10);
       labels.push(key);
-      totals.push(byDay[key] || 0);
+      const item = byDay[key] || { total: 0, profit: 0 };
+      totals.push(item.total || 0);
+      profits.push(item.profit || 0);
     }
-    res.json({ labels, totals });
+    res.json({ labels, totals, profits });
+  } catch (err) {
+    next(err);
+  }
+}
+
+
+function escapeCsv(val) {
+  if (val === null || val === undefined) return '';
+  const str = String(val);
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+async function exportSalesCsv(req, res, next) {
+  const { from, to } = req.query;
+  try {
+    let text = `SELECT sales.id, receipt_no, total_amount, amount_paid, change_amount, sales.created_at, users.full_name AS cashier
+                FROM sales JOIN users ON users.id = sales.user_id`;
+    const conditions = [];
+    const params = [];
+    if (from) {
+      params.push(from);
+      conditions.push(`sales.created_at::date >= ${params.length}::date`);
+    }
+    if (to) {
+      params.push(to);
+      conditions.push(`sales.created_at::date <= ${params.length}::date`);
+    }
+    if (conditions.length) text += ' WHERE ' + conditions.join(' AND ');
+    text += ' ORDER BY sales.created_at DESC';
+
+    const { rows: sales } = await query(text, params);
+
+    const headers = ['Receipt No', 'Date', 'Cashier', 'Total Amount', 'Amount Paid', 'Change Amount'];
+    const lines = [headers.join(',')];
+
+    for (const s of sales) {
+      lines.push([
+        escapeCsv(s.receipt_no),
+        escapeCsv(new Date(s.created_at).toLocaleString('en-PH')),
+        escapeCsv(s.cashier),
+        escapeCsv(Number(s.total_amount).toFixed(2)),
+        escapeCsv(Number(s.amount_paid).toFixed(2)),
+        escapeCsv(Number(s.change_amount).toFixed(2)),
+      ].join(','));
+    }
+
+    const csvContent = lines.join('\r\n');
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="sari-sari-sales.csv"');
+    res.status(200).send(csvContent);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function exportProductsCsv(req, res, next) {
+  try {
+    const { rows: products } = await query(`
+      SELECT products.name, products.barcode, categories.name AS category,
+             products.unit, products.cost_price, products.selling_price,
+             products.stock_quantity, products.reorder_level, products.active
+      FROM products
+      LEFT JOIN categories ON categories.id = products.category_id
+      ORDER BY products.name
+    `);
+
+    const headers = ['Product Name', 'Barcode', 'Category', 'Unit', 'Cost Price', 'Selling Price', 'Stock Quantity', 'Reorder Level', 'Active'];
+    const lines = [headers.join(',')];
+
+    for (const p of products) {
+      lines.push([
+        escapeCsv(p.name),
+        escapeCsv(p.barcode || ''),
+        escapeCsv(p.category || 'Uncategorized'),
+        escapeCsv(p.unit),
+        escapeCsv(Number(p.cost_price).toFixed(2)),
+        escapeCsv(Number(p.selling_price).toFixed(2)),
+        escapeCsv(p.stock_quantity),
+        escapeCsv(p.reorder_level),
+        escapeCsv(p.active ? 'Yes' : 'No'),
+      ].join(','));
+    }
+
+    const csvContent = lines.join('\r\n');
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="sari-sari-products.csv"');
+    res.status(200).send(csvContent);
   } catch (err) {
     next(err);
   }
 }
 
 module.exports = {
+  exportSalesCsv,
+  exportProductsCsv,
   dashboard,
   listProducts,
   createProduct,

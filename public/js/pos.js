@@ -1,5 +1,6 @@
 (function () {
   const cart = new Map(); // productId -> { id, name, price, qty, stock, unit }
+  let selectedCategory = 'all';
 
   const cartBody = document.getElementById('cartBody');
   const cartTotalEl = document.getElementById('cartTotal');
@@ -10,6 +11,8 @@
   const checkoutForm = document.getElementById('checkoutForm');
   const productGrid = document.getElementById('productGrid');
   const searchInput = document.getElementById('productSearch');
+  const categoryPills = document.getElementById('categoryPills');
+  const quickCashButtons = document.getElementById('quickCashButtons');
 
   function peso(n) {
     return '₱' + Number(n).toFixed(2);
@@ -21,9 +24,12 @@
     return div.innerHTML;
   }
 
-  // Safe for use inside a double-quoted HTML attribute (escapes quotes too).
-  function escapeAttr(str) {
-    return escapeHtml(str).replace(/"/g, '&quot;');
+  function getCartTotal() {
+    let total = 0;
+    cart.forEach((item) => {
+      total += item.price * item.qty;
+    });
+    return total;
   }
 
   function addToCart(tile) {
@@ -64,18 +70,17 @@
 
   function render() {
     cartBody.innerHTML = '';
-    let total = 0;
+    const total = getCartTotal();
 
     cart.forEach((item) => {
       const subtotal = item.price * item.qty;
-      total += subtotal;
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${escapeHtml(item.name)}</td>
         <td>${peso(item.price)}</td>
         <td class="qty-controls">
           <button type="button" data-action="dec" data-id="${item.id}" class="btn btn-small">−</button>
-          ${item.qty}
+          <span>${item.qty}</span>
           <button type="button" data-action="inc" data-id="${item.id}" class="btn btn-small">+</button>
         </td>
         <td>${peso(subtotal)}</td>
@@ -86,16 +91,71 @@
 
     cartTotalEl.textContent = peso(total);
     updateChange(total);
-    checkoutBtn.disabled = cart.size === 0;
   }
 
   function updateChange(total) {
     const paid = Number(amountPaidInput.value) || 0;
     const change = paid - total;
     changeEl.textContent = peso(change >= 0 ? change : 0);
-    changeEl.classList.toggle('text-danger', change < 0);
+    changeEl.classList.toggle('text-danger', paid > 0 && change < 0);
+
+    const isValid = cart.size > 0 && paid >= total && total > 0;
+    checkoutBtn.disabled = !isValid;
   }
 
+  // Filter products by category and search term
+  function filterProducts() {
+    const q = (searchInput ? searchInput.value : '').toLowerCase().trim();
+    const tiles = productGrid.querySelectorAll('.product-tile');
+    let firstVisible = null;
+
+    tiles.forEach((tile) => {
+      const name = (tile.dataset.name || '').toLowerCase();
+      const barcode = (tile.dataset.barcode || '').toLowerCase();
+      const catId = tile.dataset.category || '';
+
+      const matchCat = selectedCategory === 'all' || catId === selectedCategory;
+      const matchSearch = !q || name.includes(q) || barcode.includes(q);
+      const isVisible = matchCat && matchSearch;
+
+      tile.style.display = isVisible ? '' : 'none';
+      if (isVisible && !firstVisible) {
+        firstVisible = tile;
+      }
+    });
+
+    return firstVisible;
+  }
+
+  // Category Pills Click
+  if (categoryPills) {
+    categoryPills.addEventListener('click', (e) => {
+      const btn = e.target.closest('.category-pill');
+      if (!btn) return;
+      categoryPills.querySelectorAll('.category-pill').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedCategory = btn.dataset.category;
+      filterProducts();
+    });
+  }
+
+  // Quick Cash Buttons Click
+  if (quickCashButtons) {
+    quickCashButtons.addEventListener('click', (e) => {
+      const btn = e.target.closest('.quick-cash-btn');
+      if (!btn) return;
+      const total = getCartTotal();
+      if (btn.dataset.action === 'exact') {
+        amountPaidInput.value = total > 0 ? total.toFixed(2) : '';
+      } else if (btn.dataset.cash) {
+        amountPaidInput.value = Number(btn.dataset.cash).toFixed(2);
+      }
+      updateChange(total);
+      amountPaidInput.focus();
+    });
+  }
+
+  // Cart Interactions
   cartBody.addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-action]');
     if (!btn) return;
@@ -105,16 +165,19 @@
     if (action === 'remove') removeItem(id);
   });
 
+  // Product Grid Tile Click
   productGrid.addEventListener('click', (e) => {
     const tile = e.target.closest('.product-tile');
     if (tile) addToCart(tile);
   });
 
+  // Amount Paid Input Change
   amountPaidInput.addEventListener('input', () => {
-    const total = Array.from(cart.values()).reduce((sum, i) => sum + i.price * i.qty, 0);
+    const total = getCartTotal();
     updateChange(total);
   });
 
+  // Checkout Form Submission
   checkoutForm.addEventListener('submit', (e) => {
     if (cart.size === 0) {
       e.preventDefault();
@@ -124,24 +187,48 @@
     itemsInput.value = JSON.stringify(items);
   });
 
-  let searchTimer;
-  searchInput.addEventListener('input', () => {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(async () => {
-      const q = searchInput.value.trim();
-      const res = await fetch(`/pos/api/products?q=${encodeURIComponent(q)}`);
-      const products = await res.json();
-      productGrid.innerHTML = products
-        .map(
-          (p) => `
-        <button type="button" class="product-tile" data-id="${p.id}" data-name="${escapeAttr(p.name)}" data-price="${p.selling_price}" data-stock="${p.stock_quantity}" data-unit="${escapeAttr(p.unit)}">
-          <span class="product-name">${escapeHtml(p.name)}</span>
-          <span class="product-price">${peso(p.selling_price)}</span>
-          <span class="product-stock">${p.stock_quantity} ${escapeHtml(p.unit)} left</span>
-        </button>`
-        )
-        .join('');
-    }, 250);
+  // Instant Search Input
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      filterProducts();
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const firstVisible = filterProducts();
+        if (firstVisible) {
+          addToCart(firstVisible);
+          // If search was a barcode or exact match, clear it after adding
+          if (/^\d+$/.test(searchInput.value.trim())) {
+            searchInput.value = '';
+            filterProducts();
+          }
+        }
+      }
+    });
+  }
+
+  // Global Keyboard Shortcuts (F2: search, F4: pay, Esc: clear search)
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'F2') {
+      e.preventDefault();
+      if (searchInput) {
+        searchInput.focus();
+        searchInput.select();
+      }
+    } else if (e.key === 'F4') {
+      e.preventDefault();
+      if (amountPaidInput) {
+        amountPaidInput.focus();
+        amountPaidInput.select();
+      }
+    } else if (e.key === 'Escape') {
+      if (document.activeElement === searchInput) {
+        searchInput.value = '';
+        filterProducts();
+      }
+    }
   });
 
   render();

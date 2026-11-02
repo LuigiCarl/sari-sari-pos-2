@@ -1,7 +1,10 @@
 <%- include('../partials/head') %>
 <%- include('../partials/nav') %>
 <main class="container">
-  <h1>Products</h1>
+  <div class="pos-header-row">
+    <h1>Products</h1>
+    <a href="/admin/products/export.csv" class="btn btn-secondary btn-export" id="exportProductsBtn">📥 Export Products CSV</a>
+  </div>
 
   <div class="grid-2">
     <div class="card">

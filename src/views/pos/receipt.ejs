@@ -1,32 +1,71 @@
 <%- include('../partials/head') %>
 <%- include('../partials/nav') %>
-<main class="container">
-  <div class="card receipt">
-    <h1>Receipt</h1>
-    <p><strong>Receipt No:</strong> <%= sale.receipt_no %></p>
-    <p><strong>Date:</strong> <%= sale.created_at %></p>
-    <table class="table">
-      <thead><tr><th>Item</th><th>Price</th><th>Qty</th><th>Subtotal</th></tr></thead>
+<main class="container receipt-screen">
+  <div class="receipt-paper">
+    <div class="receipt-header">
+      <img src="/images/sari-sari-logo.png" alt="Sari-Sari Store Logo" class="receipt-logo" />
+      <h2 class="receipt-store-name">SARI-SARI STORE</h2>
+      <p class="receipt-subhead">Official Sales Receipt</p>
+      <div class="receipt-divider">================================</div>
+    </div>
+
+    <div class="receipt-meta">
+      <div class="receipt-meta-row"><span>Receipt #:</span> <strong><%= sale.receipt_no %></strong></div>
+      <div class="receipt-meta-row"><span>Date:</span> <span><%= sale.created_at %></span></div>
+      <div class="receipt-meta-row"><span>Cashier:</span> <span><%= sale.cashier_name || 'Juana Cruz' %></span></div>
+    </div>
+
+    <div class="receipt-divider">--------------------------------</div>
+
+    <table class="receipt-table">
+      <thead>
+        <tr>
+          <th style="text-align: left;">Item</th>
+          <th style="text-align: center;">Qty</th>
+          <th style="text-align: right;">Price</th>
+          <th style="text-align: right;">Total</th>
+        </tr>
+      </thead>
       <tbody>
         <% items.forEach(i => { %>
           <tr>
-            <td><%= i.product_name %></td>
-            <td><%= peso(i.unit_price) %></td>
-            <td><%= i.quantity %></td>
-            <td><%= peso(i.subtotal) %></td>
+            <td style="text-align: left;"><%= i.product_name %></td>
+            <td style="text-align: center;"><%= i.quantity %></td>
+            <td style="text-align: right;"><%= peso(i.unit_price) %></td>
+            <td style="text-align: right;"><%= peso(i.subtotal) %></td>
           </tr>
         <% }) %>
       </tbody>
-      <tfoot>
-        <tr><td colspan="3">Total</td><td><%= peso(sale.total_amount) %></td></tr>
-        <tr><td colspan="3">Amount Paid</td><td><%= peso(sale.amount_paid) %></td></tr>
-        <tr><td colspan="3">Change</td><td><%= peso(sale.change_amount) %></td></tr>
-      </tfoot>
     </table>
-    <div class="receipt-actions">
-      <button onclick="window.print()" class="btn btn-secondary">Print</button>
-      <a href="/pos" class="btn btn-primary">New Sale</a>
+
+    <div class="receipt-divider">--------------------------------</div>
+
+    <div class="receipt-totals">
+      <div class="receipt-total-row highlight">
+        <span>TOTAL:</span>
+        <strong><%= peso(sale.total_amount) %></strong>
+      </div>
+      <div class="receipt-total-row">
+        <span>Amount Paid:</span>
+        <span><%= peso(sale.amount_paid) %></span>
+      </div>
+      <div class="receipt-total-row">
+        <span>Change:</span>
+        <span><%= peso(sale.change_amount) %></span>
+      </div>
     </div>
+
+    <div class="receipt-divider">================================</div>
+
+    <div class="receipt-footer">
+      <p>Thank you for your purchase!</p>
+      <p>Please come again! 😊</p>
+    </div>
+  </div>
+
+  <div class="receipt-actions no-print">
+    <button onclick="window.print()" class="btn btn-secondary">🖨️ Print Receipt</button>
+    <a href="/pos" class="btn btn-primary">➕ New Sale</a>
   </div>
 </main>
 <%- include('../partials/foot') %>

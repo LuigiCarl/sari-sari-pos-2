@@ -4,10 +4,21 @@ const { setFlash } = require('../middleware/flash');
 
 async function posScreen(req, res, next) {
   try {
-    const { rows: products } = await query(
-      'SELECT * FROM products WHERE active = TRUE AND stock_quantity > 0 ORDER BY name'
-    );
-    res.render('pos/index', { title: 'Point of Sale', products });
+    const [productsRes, categoriesRes] = await Promise.all([
+      query(
+        `SELECT products.*, categories.name AS category_name
+         FROM products
+         LEFT JOIN categories ON categories.id = products.category_id
+         WHERE products.active = TRUE AND products.stock_quantity > 0
+         ORDER BY products.name`
+      ),
+      query('SELECT * FROM categories ORDER BY name')
+    ]);
+    res.render('pos/index', {
+      title: 'Point of Sale',
+      products: productsRes.rows,
+      categories: categoriesRes.rows,
+    });
   } catch (err) {
     next(err);
   }
@@ -96,10 +107,13 @@ async function postCheckout(req, res) {
 
 async function viewReceipt(req, res, next) {
   try {
-    const { rows } = await query('SELECT * FROM sales WHERE id = $1 AND user_id = $2', [
-      req.params.id,
-      req.session.user.id,
-    ]);
+    const { rows } = await query(
+      `SELECT sales.*, users.full_name AS cashier_name
+       FROM sales
+       JOIN users ON users.id = sales.user_id
+       WHERE sales.id = $1 AND sales.user_id = $2`,
+      [req.params.id, req.session.user.id]
+    );
     const sale = rows[0];
     if (!sale) return res.status(404).render('error', { title: 'Not Found', message: 'Receipt not found.' });
     const { rows: items } = await query('SELECT * FROM sale_items WHERE sale_id = $1', [sale.id]);

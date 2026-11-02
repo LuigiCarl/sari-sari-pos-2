@@ -11,6 +11,7 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const posRoutes = require('./routes/pos');
 const helpers = require('./utils/helpers');
+const db = require('./config/db');
 
 const app = express();
 const sessionSecret =
@@ -50,6 +51,23 @@ app.use(refreshAuthenticatedUser);
 app.use(flash);
 app.use(csrfProtection);
 app.locals.peso = helpers.peso;
+app.locals.formatDateTime = helpers.formatDateTime;
+
+app.use(async (req, res, next) => {
+  if (req.session && req.session.user && req.session.user.role === 'admin') {
+    try {
+      const { rows } = await db.query(
+        'SELECT COUNT(*) AS count FROM products WHERE active = TRUE AND stock_quantity <= reorder_level'
+      );
+      res.locals.lowStockCount = parseInt(rows[0].count, 10) || 0;
+    } catch {
+      res.locals.lowStockCount = 0;
+    }
+  } else {
+    res.locals.lowStockCount = 0;
+  }
+  next();
+});
 
 app.get('/', requireAuth, (req, res) => {
   res.redirect(req.session.user.role === 'admin' ? '/admin/dashboard' : '/pos');
@@ -71,7 +89,7 @@ app.use((err, req, res, next) => {
 
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`Sari-sari POS running at http://localhost:${PORT}`);
   });
 }

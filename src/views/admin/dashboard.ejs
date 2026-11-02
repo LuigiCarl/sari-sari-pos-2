@@ -1,30 +1,44 @@
 <%- include('../partials/head') %>
 <%- include('../partials/nav') %>
-<main class="container">
-  <h1>Dashboard</h1>
+<main class="container dashboard-compact">
+  <div class="dashboard-header">
+    <h1>Dashboard</h1>
+    <span class="dashboard-tag">📊 Sales & Store Overview</span>
+  </div>
 
   <div class="stat-row">
     <div class="stat-card">
-      <div class="stat-label">Today</div>
+      <div class="stat-label">Today's Sales</div>
       <div class="stat-value"><%= peso(todayTotal.total) %></div>
+      <div class="stat-profit-pill">
+        Profit: <strong><%= peso(todayProfit.profit) %></strong> <span class="stat-margin">(<%= todayMargin %>%)</span>
+      </div>
       <div class="stat-sub"><%= todayTotal.count %> transaction<%= todayTotal.count === 1 ? '' : 's' %></div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Last 7 Days</div>
       <div class="stat-value"><%= peso(weekTotal.total) %></div>
+      <div class="stat-profit-pill">
+        Profit: <strong><%= peso(weekProfit.profit) %></strong> <span class="stat-margin">(<%= weekMargin %>%)</span>
+      </div>
       <div class="stat-sub"><%= weekTotal.count %> transaction<%= weekTotal.count === 1 ? '' : 's' %></div>
     </div>
     <div class="stat-card">
       <div class="stat-label">This Month</div>
       <div class="stat-value"><%= peso(monthTotal.total) %></div>
+      <div class="stat-profit-pill">
+        Profit: <strong><%= peso(monthProfit.profit) %></strong> <span class="stat-margin">(<%= monthMargin %>%)</span>
+      </div>
       <div class="stat-sub"><%= monthTotal.count %> transaction<%= monthTotal.count === 1 ? '' : 's' %></div>
     </div>
   </div>
 
   <div class="grid-2">
     <div class="card">
-      <h2>Sales Trend (7 days)</h2>
-      <canvas id="salesTrendChart" height="220"></canvas>
+      <h2>Sales & Profit Trend (7 days)</h2>
+      <div class="chart-wrap-compact">
+        <canvas id="salesTrendChart" height="150"></canvas>
+      </div>
     </div>
 
     <div class="card">
@@ -32,61 +46,74 @@
       <% if (topProducts.length === 0) { %>
         <p class="muted">No sales recorded yet.</p>
       <% } else { %>
-        <table class="table">
-          <thead><tr><th>Product</th><th>Units</th><th>Revenue</th></tr></thead>
-          <tbody>
-            <% topProducts.forEach(p => { %>
-              <tr>
-                <td><%= p.product_name %></td>
-                <td><%= p.units_sold %></td>
-                <td><%= peso(p.revenue) %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
+        <div class="table-scroll">
+          <table class="table">
+            <thead><tr><th>Product</th><th>Units</th><th>Revenue</th><th>Profit</th></tr></thead>
+            <tbody>
+              <% topProducts.forEach(p => { %>
+                <tr>
+                  <td><%= p.product_name %></td>
+                  <td><%= p.units_sold %></td>
+                  <td><%= peso(p.revenue) %></td>
+                  <td class="cell-profit"><%= peso(p.profit) %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
       <% } %>
     </div>
   </div>
 
   <div class="grid-2">
     <div class="card">
-      <h2>Low Stock Alerts</h2>
+      <div class="card-title-row">
+        <h2>Low Stock Alerts</h2>
+        <a href="/admin/products" class="card-action-link">Manage Products →</a>
+      </div>
       <% if (lowStock.length === 0) { %>
         <p class="muted">All products are sufficiently stocked.</p>
       <% } else { %>
-        <table class="table">
-          <thead><tr><th>Product</th><th>Stock</th><th>Reorder Level</th></tr></thead>
-          <tbody>
-            <% lowStock.forEach(p => { %>
-              <tr class="<%= p.stock_quantity === 0 ? 'row-danger' : 'row-warning' %>">
-                <td><%= p.name %></td>
-                <td><%= p.stock_quantity %> <%= p.unit %></td>
-                <td><%= p.reorder_level %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
+        <div class="table-scroll">
+          <table class="table">
+            <thead><tr><th>Product</th><th>Stock</th><th>Reorder Level</th></tr></thead>
+            <tbody>
+              <% lowStock.forEach(p => { %>
+                <tr class="<%= p.stock_quantity === 0 ? 'row-danger' : 'row-warning' %>">
+                  <td><strong><%= p.name %></strong></td>
+                  <td><span class="stock-pill <%= p.stock_quantity === 0 ? 'stock-empty' : 'stock-low' %>"><%= p.stock_quantity %> <%= p.unit %></span></td>
+                  <td><%= p.reorder_level %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
       <% } %>
     </div>
 
     <div class="card">
-      <h2>Recent Transactions</h2>
+      <div class="card-title-row">
+        <h2>Recent Transactions</h2>
+        <a href="/admin/sales" class="card-action-link">View All →</a>
+      </div>
       <% if (recentSales.length === 0) { %>
         <p class="muted">No transactions yet.</p>
       <% } else { %>
-        <table class="table">
-          <thead><tr><th>Receipt</th><th>Cashier</th><th>Total</th><th>When</th></tr></thead>
-          <tbody>
-            <% recentSales.forEach(s => { %>
-              <tr>
-                <td><a href="/admin/sales/<%= s.id %>"><%= s.receipt_no %></a></td>
-                <td><%= s.cashier %></td>
-                <td><%= peso(s.total_amount) %></td>
-                <td><%= s.created_at %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
+        <div class="table-scroll table-scroll-fixed">
+          <table class="table">
+            <thead><tr><th>Receipt</th><th>Cashier</th><th>Total</th><th>When</th></tr></thead>
+            <tbody>
+              <% recentSales.forEach(s => { %>
+                <tr>
+                  <td><a href="/admin/sales/<%= s.id %>" class="receipt-code"><%= s.receipt_no %></a></td>
+                  <td><%= s.cashier %></td>
+                  <td><strong><%= peso(s.total_amount) %></strong></td>
+                  <td class="text-nowrap text-muted"><%= formatDateTime(s.created_at) %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
       <% } %>
     </div>
   </div>
@@ -100,29 +127,55 @@
     type: 'line',
     data: {
       labels: trendData.map(d => d.day.slice(5)),
-      datasets: [{
-        label: 'Sales (₱)',
-        data: trendData.map(d => d.total),
-        borderColor: '#d91f68',
-        backgroundColor: 'rgba(217, 31, 104, 0.12)',
-        pointBackgroundColor: '#d91f68',
-        pointBorderColor: '#ffffff',
-        pointRadius: 4,
-        tension: 0.35,
-        fill: true,
-      }],
+      datasets: [
+        {
+          label: 'Total Sales (₱)',
+          data: trendData.map(d => d.total),
+          borderColor: '#d91f68',
+          backgroundColor: 'rgba(217, 31, 104, 0.08)',
+          pointBackgroundColor: '#d91f68',
+          pointBorderColor: '#ffffff',
+          pointRadius: 3,
+          tension: 0.35,
+          fill: true,
+        },
+        {
+          label: 'Gross Profit (₱)',
+          data: trendData.map(d => d.profit),
+          borderColor: '#059669',
+          backgroundColor: 'rgba(5, 150, 105, 0.08)',
+          pointBackgroundColor: '#059669',
+          pointBorderColor: '#ffffff',
+          pointRadius: 3,
+          tension: 0.35,
+          fill: true,
+        }
+      ],
     },
     options: {
-      plugins: { legend: { display: false } },
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: {
+            color: '#8c6b79',
+            boxWidth: 10,
+            usePointStyle: true,
+            font: { weight: '600', size: 11 }
+          }
+        }
+      },
       scales: {
         y: {
           beginAtZero: true,
-          grid: { color: 'rgba(243, 220, 230, 0.6)' },
-          ticks: { color: '#8c6b79' }
+          grid: { color: 'rgba(243, 220, 230, 0.5)' },
+          ticks: { color: '#8c6b79', font: { size: 10 } }
         },
         x: {
-          grid: { color: 'rgba(243, 220, 230, 0.35)' },
-          ticks: { color: '#8c6b79' }
+          grid: { color: 'rgba(243, 220, 230, 0.25)' },
+          ticks: { color: '#8c6b79', font: { size: 10 } }
         }
       },
     },
