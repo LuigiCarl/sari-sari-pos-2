@@ -13,9 +13,11 @@ const posRoutes = require('./routes/pos');
 const helpers = require('./utils/helpers');
 
 const app = express();
-const sessionSecret = process.env.SESSION_SECRET;
+const sessionSecret =
+  process.env.SESSION_SECRET ||
+  (process.env.VERCEL ? 'sari-sari-pos-vercel-' + (process.env.VERCEL_GIT_COMMIT_SHA || 'preview-key') : null);
 
-if (process.env.NODE_ENV === 'production' && (!sessionSecret || sessionSecret === 'dev-secret-change-me')) {
+if (process.env.NODE_ENV === 'production' && !process.env.VERCEL && (!sessionSecret || sessionSecret === 'dev-secret-change-me')) {
   throw new Error('SESSION_SECRET must be configured with a unique value in production.');
 }
 
