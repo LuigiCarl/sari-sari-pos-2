@@ -1,0 +1,64 @@
+name: Automated CI Tests
+
+on:
+  push:
+    branches: [main, luigi]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Playwright E2E & Backend Verification
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgrespassword
+          POSTGRES_DB: sari_sari_pos
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      POSTGRES_URL: postgres://postgres:postgrespassword@localhost:5432/sari_sari_pos
+      SESSION_SECRET: ci-session-secret-key-1234567890
+      PORT: 3000
+      ADMIN_SIGNUP_CODE: ci-admin-secret-123
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Seed Database
+        run: npm run seed
+
+      - name: Run Playwright Test Suite
+        run: npm test
+
+      - name: Upload Test Report (if failed)
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
