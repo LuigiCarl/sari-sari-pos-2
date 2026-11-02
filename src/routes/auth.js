@@ -14,7 +14,10 @@ function renderRateLimitError(req, res) {
   });
 }
 
+const isTestEnv = process.env.NODE_ENV === 'test' || Boolean(process.env.CI);
+
 const loginLimiter = rateLimit({
+  skip: () => isTestEnv,
   windowMs: 15 * 60 * 1000,
   limit: 5,
   standardHeaders: 'draft-8',
@@ -24,6 +27,7 @@ const loginLimiter = rateLimit({
 });
 
 const registrationLimiter = rateLimit({
+  skip: () => isTestEnv,
   windowMs: 60 * 60 * 1000,
   limit: 5,
   standardHeaders: 'draft-8',

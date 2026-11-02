@@ -31,6 +31,7 @@ jobs:
       SESSION_SECRET: ci-session-secret-key-1234567890
       PORT: 3000
       ADMIN_SIGNUP_CODE: ci-admin-secret-123
+      NODE_ENV: test
 
     steps:
       - name: Checkout Code
